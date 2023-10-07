@@ -9,10 +9,17 @@ exports.Login = async (req, res) => {
   
       // Create a Participant
       const user = new User(retrieveValidRequest);
-  
-      const token = jwt.sign(retrieveValidRequest, process.env.SECRET_KEY_APPLICATION, { expiresIn: '7d', algorithm: 'HS384' });
-  
-      res.status(200).send({ error: false, response: token });
+      let retrieveListUsers = await User.findOneByUsername(user);
+      if(!retrieveListUsers.length) {
+        throw { message: `Username Not Found.` }
+      }else if(retrieveListUsers.length) {
+        if(retrieveListUsers[0].username === user.username && retrieveListUsers[0].password === user.password) {
+          const token = jwt.sign(retrieveValidRequest, process.env.SECRET_KEY_APPLICATION, { expiresIn: '7d', algorithm: 'HS384' });
+          res.status(200).send({ error: false, response: token });
+        } else {
+          throw { message: `Invalid Username or Password.` }
+        }
+      }
     } catch (error) {
       res.status(200).send({ error: true, response: error.message });
     }

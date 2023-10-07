@@ -46,4 +46,23 @@ User.findOne = async (user) => {
     }
 };
 
+User.findOneByUsername = async (user) => {
+    try {
+        const results = await new Promise((resolve, reject) => {
+            sql.query(
+                /* sql */ `SELECT * FROM users WHERE username =?`, [user.username]
+                ,
+                (err, res) => {
+                    if (err) reject(err);
+                    resolve(res);
+                }
+            );
+        })
+            .then((response) => response)
+        return results;
+    } catch (error) {
+        throw error;
+    }
+};
+
 module.exports = User;
