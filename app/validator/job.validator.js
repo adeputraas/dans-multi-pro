@@ -19,6 +19,23 @@ exports.create = async (newParticipants) => {
     }
 };
 
+exports.retrieveAll = async (newParticipants) => {
+
+    const schema = Joi.object({
+        description: Joi.string(),
+        location: Joi.string(),
+        full_time: Joi.boolean(),
+        page: Joi.number()
+    }).required();
+
+    try {
+        const response = await schema.validateAsync(newParticipants);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
 exports.updateById = async (newParticipants) => {
 
     const schema = Joi.object({

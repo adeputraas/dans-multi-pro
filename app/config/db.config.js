@@ -3,5 +3,5 @@ module.exports = {
   PORT: "3306",
   USER: "root",
   PASSWORD: "root",
-  DB: "talentica"
+  DB: "dansmultipro"
 };

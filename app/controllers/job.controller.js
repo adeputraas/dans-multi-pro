@@ -1,5 +1,6 @@
-const Participant = require("../models/participant.model.js");
-const validateRequest = require('../validator/participant.validator');
+const { default: axios } = require("axios");
+const Participant = require("../models/job.model.js");
+const validateRequest = require('../validator/job.validator.js');
 
 // Create and Save a new Participant
 exports.create = async (req, res) => {
@@ -20,11 +21,31 @@ exports.create = async (req, res) => {
 
 // Retrieve all Tutorials from the database (with condition).
 exports.findAll = async (req, res) => {
-    try {
-  
-      // Insert Database
-      const retrieveListParticipants = await Participant.getAll();
-      res.status(200).send({error: false,  response: retrieveListParticipants})
+    try {  
+
+      // const retrieveValidRequest = await validateRequest.retrieveAll(req.body); 
+
+      let url = process.env.URL_JOBS + "/api/recruitment/positions.json";
+
+      if(req.body.page) {
+        url += `?page=${req.body.page}`;
+      }
+
+      let retrieveListJobs = await axios.get(url).then((response) => response.data);
+
+      if(req.body.description) {
+        retrieveListJobs = retrieveListJobs.filter(job => job.description.includes(req.body.description));
+      }
+
+      if(req.body.location) {
+        retrieveListJobs = retrieveListJobs.filter(job => job.location.includes(req.body.location));
+      }
+
+      if(req.body.full_time) {
+        retrieveListJobs = retrieveListJobs.filter(job => job.type == "Full Time");
+      }
+
+      res.status(200).send({error: false,  response: retrieveListJobs})
   
     } catch (error) {
         res.status(200).send({error: true,  response: error.message})
@@ -37,25 +58,12 @@ exports.findOne = async (req, res) => {
   
         const retrieveValidRequest = await validateRequest.readById(req.params);
 
-        // Create a Participant
-        const participant = new Participant(retrieveValidRequest);
-        let retrieveListParticipants = await Participant.findOne(participant);
-        if(retrieveListParticipants.length){
-            retrieveListParticipants = retrieveListParticipants.map((dataparticipant => {
-              const intelegensi = ((((40/100) * dataparticipant.x) +  ((60/100) * dataparticipant.y)) / 2);
-              const numerical = ((((30/100) * dataparticipant.z) +  ((70/100) * dataparticipant.w)) / 2);
+        let url = process.env.URL_JOBS + "/api/recruitment/positions.json";
 
-              const rowIntel = intelegensi >= 0 && intelegensi <= 10 ? 1 : intelegensi >= 11 && intelegensi <= 20 ? 2 : intelegensi >= 21 && intelegensi <= 30 ? 3 : intelegensi >= 31 && intelegensi <= 40 ? 4 : 5;
-              const rowNum = numerical >= 0 && numerical <= 10 ? 1 : numerical >= 11 && numerical <= 20 ? 2 : numerical >= 21 && numerical <= 30 ? 3 : numerical >= 31 && numerical <= 40 ? 4 : 5;
-                return {
-                    ...dataparticipant,
-                    aspect: [{name: "Aspek Intelegensi", row: rowIntel}, {name: "Aspek Numerical Ability", row: rowNum}]
-                    
-                }
-            }))
-        }
+        let retrieveListJobs = await axios.get(url).then((response) => response.data);
+        retrieveListJobs = retrieveListJobs.filter(job => job.id == retrieveValidRequest.id );
 
-        res.status(200).send({error: false,  response: retrieveListParticipants})
+        res.status(200).send({error: false,  response: retrieveListJobs})
   
     } catch (error) {
         res.status(200).send({error: true,  response: error.message})

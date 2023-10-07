@@ -1,6 +1,7 @@
 const express = require("express");
 // const bodyParser = require("body-parser"); /* deprecated */
 const cors = require("cors");
+const routes = require('./app/routes/index');
 
 const app = express();
 
@@ -24,7 +25,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to Ade Application Task" });
 });
 
-require("./app/routes/participant.routes.js")(app);
+require("dotenv").config();
+
+let key = routes;
+for (key in routes) {
+  app.use("/api", routes[key]);
+}
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
